@@ -39,7 +39,7 @@ interface ModuleTestCases {
 
 export default function TestCasesDisplay() {
   const testCases = useTestCases();
-
+  console.log(testCases, "this is the testcases");
   if (!testCases)
     return <div className="p-6">No test cases generated yet.</div>;
 

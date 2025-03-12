@@ -72,13 +72,14 @@ Format test cases with clear steps, expected results, and prerequisites.
       };
     }
 
-    // Parse the markdown sections
-    const sections = parseSections(response);
+    // Parse the response into sections
+    const parsedSections = parseSections(response);
 
+    // Store the raw markdown sections
     return {
       success: true,
       text: response,
-      sections,
+      sections: parsedSections,
     };
   } catch (error) {
     console.error("OpenAI error:", error);
@@ -100,29 +101,26 @@ function parseSections(markdown: string): AnalysisResponse {
   };
 
   try {
-    console.log(markdown.split("# "));
-    // Split the markdown into sections using regex lookahead
-    const requirementsSection = markdown.match(
-      /### 1\. REQUIREMENTS\n([\s\S]*?)(?=### 2\. TEST CASES)/
+    // Split the markdown into sections using regex
+    const requirementsMatch = markdown.match(
+      /### 1\. REQUIREMENTS[\s\S]*?(?=### 2\. TEST CASES)/
     );
-    const testCasesSection = markdown.match(
-      /### 2\. TEST CASES\n([\s\S]*?)(?=### 3\. SUMMARY)/
+    const testCasesMatch = markdown.match(
+      /### 2\. TEST CASES[\s\S]*?(?=### 3\. SUMMARY)/
     );
-    const summarySection = markdown.match(/### 3\. SUMMARY\n([\s\S]*?)$/);
+    const summaryMatch = markdown.match(/### 3\. SUMMARY[\s\S]*?$/);
 
-    // Extract Requirements section
-    if (requirementsSection && requirementsSection[1]) {
-      sections.requirements = `### Requirements\n${requirementsSection[1].trim()}`;
+    // Extract and assign each section with their raw markdown content
+    if (requirementsMatch) {
+      sections.requirements = requirementsMatch[0].trim();
     }
 
-    // Extract Test Cases section
-    if (testCasesSection && testCasesSection[1]) {
-      sections.testCases = `### Test Cases\n${testCasesSection[1].trim()}`;
+    if (testCasesMatch) {
+      sections.testCases = testCasesMatch[0].trim();
     }
 
-    // Extract Summary section
-    if (summarySection && summarySection[1]) {
-      sections.summary = `### Summary\n${summarySection[1].trim()}`;
+    if (summaryMatch) {
+      sections.summary = summaryMatch[0].trim();
     }
 
     // If no sections were found, log warning

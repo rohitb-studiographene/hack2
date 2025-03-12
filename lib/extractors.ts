@@ -160,3 +160,27 @@ export async function processContent(url: string): Promise<string> {
     );
   }
 }
+
+export function parseSections(content: string) {
+  const cookies = new Map<string, string>();
+
+  // Extract requirements section
+  const requirementsMatch = content.match(/REQUIREMENTS:\s*`([^`]+)`/);
+  if (requirementsMatch) {
+    cookies.set("requirements", requirementsMatch[1].trim());
+  }
+
+  // Extract test cases section
+  const testCasesMatch = content.match(/TEST-CASES:\s*`([^`]+)`/);
+  if (testCasesMatch) {
+    cookies.set("testcases", testCasesMatch[1].trim());
+  }
+
+  // Extract summary section
+  const summaryMatch = content.match(/SUMMARY:\s*`([^`]+)`/);
+  if (summaryMatch) {
+    cookies.set("summary", summaryMatch[1].trim());
+  }
+
+  return cookies;
+}

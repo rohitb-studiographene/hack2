@@ -31,12 +31,14 @@ import {
   AlertCircle,
 } from "@/components/ui/alert";
 import OriginalContentDisplay from "@/components/original-content-display";
+import RequirementsParser from "@/components/requirements-parser";
 
 export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isProcessingAI, setIsProcessingAI] = useState(false);
   const [hasContent, setHasContent] = useState(false);
+  const [content, setContent] = useState<string | null>(null);
 
   const handleProcessRequirements = async (formData: FormData) => {
     try {
@@ -47,6 +49,7 @@ export default function Home() {
       } else {
         setError(null);
         setHasContent(true);
+        setContent(result.content);
       }
     } finally {
       setIsProcessing(false);
@@ -90,8 +93,7 @@ export default function Home() {
             <CardHeader>
               <CardTitle className="text-2xl">Input Requirements</CardTitle>
               <CardDescription className="text-lg">
-                Enter a Confluence or Google Docs URL, or paste requirements
-                directly
+                Enter a Confluence
               </CardDescription>
             </CardHeader>
             <form
@@ -181,6 +183,8 @@ export default function Home() {
             </TabsContent>
           </div>
         </Tabs>
+
+        {content && <RequirementsParser content={content} />}
       </div>
     </main>
   );

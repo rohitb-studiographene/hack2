@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { getAIProvider } from "./ai-providers";
-import { extractRequirements, processContent } from "./extractors";
+import {
+  extractRequirements,
+  processContent,
+  parseSections,
+} from "./extractors";
 import { cookies } from "next/headers";
 
 // Process requirements from URL
@@ -124,35 +128,29 @@ export async function getIdentifiedModules() {
 }
 
 // Get the generated test cases
-export async function getGeneratedTestCases() {
-  const testCasesJson = cookies().get("generatedTestCases")?.value;
-
-  if (!testCasesJson) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(testCasesJson);
-  } catch (e) {
-    console.error("Failed to parse test cases from cookie:", e);
-    return null;
-  }
+export async function getGeneratedTestCases(): Promise<string> {
+  // try {
+  const testCases = cookies().get("generatedTestCases")?.value;
+  // if (!testCases) return "";
+  // Return the raw markdown content instead of parsing as JSON
+  return testCases ?? "";
+  // } catch (error) {
+  //   console.error("Failed to parse test cases from cookie:", error);
+  //   return "";
+  // }
 }
 
 // Get the generated summaries
-export async function getGeneratedSummaries() {
-  const summariesJson = cookies().get("generatedSummaries")?.value;
-
-  if (!summariesJson) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(summariesJson);
-  } catch (e) {
-    console.error("Failed to parse summaries from cookie:", e);
-    return null;
-  }
+export async function getGeneratedSummaries(): Promise<string> {
+  // try {
+  const summaries = cookies().get("generatedSummaries")?.value;
+  if (!summaries) return "";
+  // Return the raw markdown content instead of parsing as JSON
+  return summaries ?? "";
+  // } catch (error) {
+  //   console.error("Failed to parse summaries from cookie:", error);
+  //   return "";
+  // }
 }
 
 // Store original content in cookie
@@ -228,4 +226,24 @@ export async function getOriginalContent() {
 
   // Fall back to single cookie
   return cookies().get("originalContent")?.value || null;
+}
+
+export async function processDocument(content: string) {
+  const cookieStore = cookies();
+  const sections = parseSections(content);
+
+  // Set cookies with 48 hour expiry (in seconds)
+  const cookieOptions = {
+    maxAge: 48 * 60 * 60,
+    path: "/",
+  };
+
+  sections.forEach((value, key) => {
+    cookieStore.set(key, value, cookieOptions);
+  });
+
+  return {
+    success: true,
+    message: "Document processed successfully",
+  };
 }
